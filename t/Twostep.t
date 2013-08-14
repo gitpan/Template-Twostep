@@ -2,15 +2,16 @@
 use strict;
 
 use Test::More tests => 34;
+use File::Spec::Functions qw(catdir catfile rel2abs splitdir);
 
 #----------------------------------------------------------------------
 # Load package
 
-my @path = split(/\//, $0);
+my @path = splitdir(rel2abs($0));
+pop(@path);
 pop(@path);
 
-my $bin = join('/', @path);
-my $lib = "$bin/../lib";
+my $lib = catdir(@path, 'lib');
 unshift(@INC, $lib);
 
 require Template::Twostep;
@@ -274,8 +275,9 @@ is($text, "\$x is unknown\n", "Elsif block"); # test 33
 #----------------------------------------------------------------------
 # Create test directory
 
-system("/bin/rm -rf $bin/../test");
-mkdir "$bin/../test";
+my $test = catdir(@path, 'test');
+system("/bin/rm -rf $test");
+mkdir $test;
 
 $template = <<'EOQ';
 <!-- section header -->
@@ -302,12 +304,12 @@ $num people
 <!-- endsection -->
 EOQ
 
-my $template_file = "$bin/../test/template.txt";
+my $template_file = catfile($test, 'template.txt');
 my $fd = IO::File->new($template_file, 'w');
 print $fd $template;
 close $fd;
 
-my $subtemplate_file = "$bin/../test/subtemplate.txt";
+my $subtemplate_file = catfile($test, 'subtemplate.txt');
 $fd = IO::File->new($subtemplate_file, 'w');
 print $fd $subtemplate;
 close $fd;
