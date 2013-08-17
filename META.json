@@ -52,7 +52,7 @@
    "provides" : {
       "Template::Twostep" : {
          "file" : "lib/Template/Twostep.pm",
-         "version" : "1.01"
+         "version" : "0"
       }
    },
    "release_status" : "stable",
@@ -66,5 +66,5 @@
          "web" : "https://github.com/Jinzang/Template-Twostep"
       }
    },
-   "version" : "1.01"
+   "version" : "0"
 }

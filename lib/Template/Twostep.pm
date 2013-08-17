@@ -8,7 +8,7 @@ use integer;
 use Carp;
 use IO::File;
 
-our $VERSION = "1.01";
+our $VERSION = "y";
 
 #----------------------------------------------------------------------
 # Create a new template engine
@@ -266,6 +266,7 @@ sub parameters {
                       command_start => '<!-- ',
                       command_end => '-->',
                       escaped_chars => '<>',
+                      keep_sections => 0,
                       };
 
     return $parameters;
@@ -297,9 +298,17 @@ sub parse_block {
                 my @sub_block = $self->parse_block($sections, $lines, $cmd);
 
                 if ($cmd eq 'section') {
-                    pop(@sub_block);
-                    $sections->{$arg} = \@sub_block unless exists $sections->{$arg};
-                    push(@block, @{$sections->{$arg}});
+                    my $endline = pop(@sub_block);
+                    my ($name, $rest) = split(' ', $arg, 2);
+
+                    $sections->{$name} = \@sub_block
+                        unless exists $sections->{$name};
+
+                    if ($self->{keep_sections}) {
+                        push(@block, $line, @{$sections->{$name}}, $endline);                        
+                    } else {
+                        push(@block, @{$sections->{$name}});
+                    }
 
                 } else {
                     push(@block, $line, @sub_block);
@@ -335,19 +344,22 @@ sub parse_code {
             }
 
             my $command = $self->get_command($cmd);
-            croak "Unknown command: $cmd" unless defined $command;
-
-            my $ref = ref ($command);
-            if (! $ref) {
-                $arg = $self->encode_expression($arg);
-                $command =~ s/%%/$arg/;
-                $code .= "$command\n";
-
-            } elsif ($ref eq 'CODE') {
-                $code .= $command->($self, $arg);
-
+            if (defined $command) {
+                my $ref = ref ($command);
+                if (! $ref) {
+                    $arg = $self->encode_expression($arg);
+                    $command =~ s/%%/$arg/;
+                    $code .= "$command\n";
+    
+                } elsif ($ref eq 'CODE') {
+                    $code .= $command->($self, $arg);
+    
+                } else {
+                    die "I don't know how to handle a $ref: $cmd";
+                }
+            
             } else {
-                die "I don't know how to handle a $ref: $cmd";
+                $stash .=  $self->encode_text($line);
             }
 
         } else {
@@ -578,16 +590,17 @@ with the contents of the corresponding block in the subtemplate.
 
 =over 4
 
-=item C<$obj = Template::Twostep->new(command_start => '::', command_end => '');>
+=item C<$obj = Template::Twostep-E<gt>new(command_start =E<gt> '::', command_end =E<gt> '');>
 
 Create a new parser. The configuration allows you to set a set of characters to
 escape when found in the data (escaped_chars), the string which starts a command
-(command_start), and the string which ends a command (command_end). All commands
-end at the end of line. However, you may wish to place commends inside comments
-and comments may require a closing string. By setting command_end, the closing
+(command_start), the string which ends a command (command_end), and whether
+section commands are kept in the output (keep_sections). All commands end at the
+end of line. However, you may wish to place commends inside comments and
+comments may require a closing string. By setting command_end, the closing
 string will be stripped from the end of the command.
 
-=item C<$sub = $obj->compile($template, $subtemplate);>
+=item C<$sub = $obj-E<gt>compile($template, $subtemplate);>
 
 Generate a subroutine used to render data from a template and optionally from
 one or more subtemplates. It can be invoked by an object created by a call to

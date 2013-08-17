@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 
-use Test::More tests => 34;
+use Test::More tests => 38;
 use File::Spec::Functions qw(catdir catfile rel2abs splitdir);
 
 #----------------------------------------------------------------------
@@ -93,9 +93,9 @@ is_deeply($data, {1 => 3}, "Coerce hash to hash"); # test 19
 # Test parse_block
 
 my $template = <<'EOQ';
-<!-- section header -->
+<!-- section header extra -->
 Header
-<!-- endsection -->
+<!-- endsection header -->
 <!-- set $i = 0 -->
 <!-- for @data -->
   <!-- set $i = $i + 1 -->
@@ -107,7 +107,7 @@ Odd line
 <!-- endfor -->
 <!-- section footer -->
 Footer
-<!-- endsection -->
+<!-- endsection footer -->
 EOQ
 
 my $sections = {};
@@ -160,6 +160,33 @@ EOQ
 
 is($text, $text_ok, "Run compiled template"); # test 26
 
+$pp->{keep_sections} = 1;
+@lines = map {"$_\n"} split(/\n/, $template);
+@sublines = map {"$_\n"} split(/\n/, $subtemplate);
+
+@block = $pp->parse_block($sections, \@sublines, '');
+@block = $pp->parse_block($sections, \@lines, '');
+
+is($block[0], "<!-- section header extra -->\n", "Keep sections start teag"); # test 27
+is($block[2], "<!-- endsection header -->\n", "Keep sections start teag"); # test 28
+
+$sub = $pp->compile($template, $subtemplate);
+is(ref $sub, 'CODE', "compiled template with keep sections"); # test 29
+
+$text = $sub->([1, 2]);
+$text_ok = <<'EOQ';
+<!-- section header extra -->
+Another Header
+<!-- endsection header -->
+Even line
+Odd line
+<!-- section footer -->
+Another Footer
+<!-- endsection footer -->
+EOQ
+
+is($text, $text_ok, "Run ompiled template with keep sections"); # test 30
+
 #----------------------------------------------------------------------
 # Test configurable command start and end
 
@@ -172,7 +199,7 @@ $pp = Template::Twostep->new(command_start => '/*', command_end => '*/');
 $sub = $pp->compile($template);
 $text = $sub->({x => 3});
 
-is($text, "2 * 3 = 6\n", "Configurable start and end"); # test 27
+is($text, "2 * 3 = 6\n", "Configurable start and end"); # test 31
 
 #----------------------------------------------------------------------
 # Test for loop
@@ -194,7 +221,7 @@ Ann : 4444
 Joe : 5555
 EOQ
 
-is($text, $text_ok, "For loop"); # test 28
+is($text, $text_ok, "For loop"); # test 32
 
 #----------------------------------------------------------------------
 # Test with block
@@ -218,7 +245,7 @@ $text_ok = <<'EOQ';
 2
 EOQ
 
-is($text, $text_ok, "With block"); # test 29
+is($text, $text_ok, "With block"); # test 33
 
 #----------------------------------------------------------------------
 # Test while loop
@@ -243,7 +270,7 @@ $text_ok = <<'EOQ';
 go
 EOQ
 
-is($text, $text_ok, "While loop"); # test 30
+is($text, $text_ok, "While loop"); # test 34
 
 #----------------------------------------------------------------------
 # Test if blocks
@@ -262,15 +289,15 @@ $sub = Template::Twostep->compile($template);
 
 $data = {x => 1};
 $text = $sub->($data);
-is($text, "\$x is 1 (one)\n", "If block"); # test 31
+is($text, "\$x is 1 (one)\n", "If block"); # test 35
 
 $data = {x => 2};
 $text = $sub->($data);
-is($text, "\$x is 2 (two)\n", "Elsif block"); # test 32
+is($text, "\$x is 2 (two)\n", "Elsif block"); # test 36
 
 $data = {x => 3};
 $text = $sub->($data);
-is($text, "\$x is unknown\n", "Elsif block"); # test 33
+is($text, "\$x is unknown\n", "Elsif block"); # test 37
 
 #----------------------------------------------------------------------
 # Create test directory
@@ -329,5 +356,5 @@ Joe 5555
 2 people
 EOQ
 
-is($text, $text_ok, "Parse files"); # test 34
+is($text, $text_ok, "Parse files"); # test 38
 
