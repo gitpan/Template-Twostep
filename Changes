@@ -1,6 +1,6 @@
 Revision history for Perl extension Template-Twostep
 
-0 2013-08-17T23:28:57Z
+1.02 2013-08-17T23:57:48Z
     - added keep_sections option
 
 1.01 2013-08-14
