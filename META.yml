@@ -27,11 +27,11 @@ no_index:
 provides:
   Template::Twostep:
     file: lib/Template/Twostep.pm
-    version: 1.02
+    version: 1.03
 requires:
   perl: 5.008005
 resources:
   bugtracker: https://github.com/Jinzang/Template-Twostep/issues
   homepage: https://github.com/Jinzang/Template-Twostep
   repository: https://github.com/Jinzang/Template-Twostep.git
-version: 1.02
+version: 1.03

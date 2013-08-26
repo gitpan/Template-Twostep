@@ -5,7 +5,6 @@ META.json
 README.md
 cpanfile
 lib/Template/Twostep.pm
-t/00_compile.t
 t/Twostep.t
 META.yml
 MANIFEST
