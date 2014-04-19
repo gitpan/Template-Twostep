@@ -69,7 +69,7 @@ with the contents of the corresponding block in the subtemplate.
     escape when found in the data (escaped\_chars), the string which starts a command
     (command\_start), the string which ends a command (command\_end), and whether
     section commands are kept in the output (keep\_sections). All commands end at the
-    end of line. However, you may wish to place commends inside comments and
+    end of line. However, you may wish to place commands inside comments and
     comments may require a closing string. By setting command\_end, the closing
     string will be stripped from the end of the command.
 
@@ -119,20 +119,19 @@ The following commands are supported in templates:
     The remainder of the line is interpreted as Perl code. For assignments, use
     the set command.
 
-- if
+- each
 
-    The text until the matching `endif` is included only if the expression in the
-    "if" command is true. If false, the text is skipped. The "if" command can contain
-    an `else`, in which case the text before the "else" is included if the
-    expression in the "if" command is true and the text after the "else" is included
-    if it is false. You can also place an "elsif" command in the "if" block, which
-    includes the following text if its expression is true.
+    Repeat the text between the "each" and "endeach" commands for each entry in the
+    hash table. The hast table key can be accessed through the variable $key and
+    the hash table value through the variable $value. Key-value pairs are returned
+    in random order. For example, this code displays the contents of a hash as a
+    list:
 
-        <!-- if $highlight eq 'y' -->
-        <em>$text</em>
-        <!-- else -->
-        $text
-        <!-- endif -->
+        <ul>
+        <!-- each %hash -->
+        <li><b>$key</b> $value</li>
+        <!-- endeach -->
+        </ul>
 
 - for
 
@@ -150,6 +149,21 @@ The following commands are supported in templates:
         <!-- endfor -->
 
     displays the entire phone list.
+
+- if
+
+    The text until the matching `endif` is included only if the expression in the
+    "if" command is true. If false, the text is skipped. The "if" command can contain
+    an `else`, in which case the text before the "else" is included if the
+    expression in the "if" command is true and the text after the "else" is included
+    if it is false. You can also place an "elsif" command in the "if" block, which
+    includes the following text if its expression is true.
+
+        <!-- if $highlight eq 'y' -->
+        <em>$text</em>
+        <!-- else -->
+        $text
+        <!-- endif -->
 
 - section
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 
-use Test::More tests => 38;
+use Test::More tests => 40;
 use File::Spec::Functions qw(catdir catfile rel2abs splitdir);
 
 #----------------------------------------------------------------------
@@ -224,6 +224,26 @@ EOQ
 is($text, $text_ok, "For loop"); # test 32
 
 #----------------------------------------------------------------------
+# Test each loop
+
+$template = <<'EOQ';
+<ul>
+<!-- each %hash -->
+<li><b>$key</b> $value</li>
+<!-- endeach -->
+</ul>
+EOQ
+
+$sub = Template::Twostep->compile($template);
+$data = {hash => {one => 1, two => 2, three => 3}};
+
+$text = $sub->($data);
+like($text, qr(<li><b>two</b> 2</li>), 'Each loop substitution'); # Test 33
+
+my @match = $text =~ /(<li>)/g;
+is(scalar @match, 3, 'Each loop count'); # Test 34
+
+#----------------------------------------------------------------------
 # Test with block
 
 $template = <<'EOQ';
@@ -245,7 +265,7 @@ $text_ok = <<'EOQ';
 2
 EOQ
 
-is($text, $text_ok, "With block"); # test 33
+is($text, $text_ok, "With block"); # test 35
 
 #----------------------------------------------------------------------
 # Test while loop
@@ -270,7 +290,7 @@ $text_ok = <<'EOQ';
 go
 EOQ
 
-is($text, $text_ok, "While loop"); # test 34
+is($text, $text_ok, "While loop"); # test 36
 
 #----------------------------------------------------------------------
 # Test if blocks
@@ -289,15 +309,15 @@ $sub = Template::Twostep->compile($template);
 
 $data = {x => 1};
 $text = $sub->($data);
-is($text, "\$x is 1 (one)\n", "If block"); # test 35
+is($text, "\$x is 1 (one)\n", "If block"); # test 37
 
 $data = {x => 2};
 $text = $sub->($data);
-is($text, "\$x is 2 (two)\n", "Elsif block"); # test 36
+is($text, "\$x is 2 (two)\n", "Elsif block"); # test 38
 
 $data = {x => 3};
 $text = $sub->($data);
-is($text, "\$x is unknown\n", "Elsif block"); # test 37
+is($text, "\$x is unknown\n", "Elsif block"); # test 39
 
 #----------------------------------------------------------------------
 # Create test directory
@@ -356,5 +376,5 @@ Joe 5555
 2 people
 EOQ
 
-is($text, $text_ok, "Parse files"); # test 38
+is($text, $text_ok, "Parse files"); # test 40
 

@@ -8,7 +8,7 @@ use integer;
 use Carp;
 use IO::File;
 
-our $VERSION = "1.03";
+our $VERSION = "1.04";
 
 #----------------------------------------------------------------------
 # Create a new template engine
@@ -221,6 +221,9 @@ sub get_command {
 
     my $commands = {
                     do => "%%;",
+                    each => "while (my (\$k, \$v) = each %%) {\n" .
+                            "\$self->push_stack({key=>\$k, value=>\$v});",
+                    endeach => "\$self->pop_stack();\n}",
                     for => "foreach (%%) {\n\$self->push_stack(\$_);",
                 	endfor => "\$self->pop_stack();\n}",
                     if => "if (%%) {",
@@ -596,7 +599,7 @@ Create a new parser. The configuration allows you to set a set of characters to
 escape when found in the data (escaped_chars), the string which starts a command
 (command_start), the string which ends a command (command_end), and whether
 section commands are kept in the output (keep_sections). All commands end at the
-end of line. However, you may wish to place commends inside comments and
+end of line. However, you may wish to place commands inside comments and
 comments may require a closing string. By setting command_end, the closing
 string will be stripped from the end of the command.
 
@@ -650,20 +653,19 @@ The following commands are supported in templates:
 The remainder of the line is interpreted as Perl code. For assignments, use
 the set command.
 
-=item if
+=item each
 
-The text until the matching C<endif> is included only if the expression in the
-"if" command is true. If false, the text is skipped. The "if" command can contain
-an C<else>, in which case the text before the "else" is included if the
-expression in the "if" command is true and the text after the "else" is included
-if it is false. You can also place an "elsif" command in the "if" block, which
-includes the following text if its expression is true.
+Repeat the text between the "each" and "endeach" commands for each entry in the
+hash table. The hast table key can be accessed through the variable $key and
+the hash table value through the variable $value. Key-value pairs are returned
+in random order. For example, this code displays the contents of a hash as a
+list:
 
-    <!-- if $highlight eq 'y' -->
-    <em>$text</em>
-    <!-- else -->
-    $text
-    <!-- endif -->
+    <ul>
+    <!-- each %hash -->
+    <li><b>$key</b> $value</li>
+    <!-- endeach -->
+    </ul>
 
 =item for
 
@@ -681,6 +683,21 @@ a list of hashes, and each hash has two entries, NAME and PHONE. Then the code
     <!-- endfor -->
 
 displays the entire phone list.
+
+=item if
+
+The text until the matching C<endif> is included only if the expression in the
+"if" command is true. If false, the text is skipped. The "if" command can contain
+an C<else>, in which case the text before the "else" is included if the
+expression in the "if" command is true and the text after the "else" is included
+if it is false. You can also place an "elsif" command in the "if" block, which
+includes the following text if its expression is true.
+
+    <!-- if $highlight eq 'y' -->
+    <em>$text</em>
+    <!-- else -->
+    $text
+    <!-- endif -->
 
 =item section
 

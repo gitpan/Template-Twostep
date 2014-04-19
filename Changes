@@ -1,5 +1,8 @@
 Revision history for Perl extension Template-Twostep
 
+1.04 2014-04-19T15:36:51Z
+    - added each/endeach commands to template
+
 1.03 2013-08-26T22:24:04Z
     - removed compile test
     
