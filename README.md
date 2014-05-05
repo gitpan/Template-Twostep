@@ -68,7 +68,7 @@ with the contents of the corresponding block in the subtemplate.
     Create a new parser. The configuration allows you to set a set of characters to
     escape when found in the data (escaped\_chars), the string which starts a command
     (command\_start), the string which ends a command (command\_end), and whether
-    section commands are kept in the output (keep\_sections). All commands end at the
+    section comments are kept in the output (keep\_sections). All commands end at the
     end of line. However, you may wish to place commands inside comments and
     comments may require a closing string. By setting command\_end, the closing
     string will be stripped from the end of the command.
